@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Brain, 
   Dna, 
@@ -13,15 +13,16 @@ import {
   Menu, 
   X, 
   Terminal,
-  Microscope,
-  Fingerprint,
   Zap,
-  Globe
+  Globe,
+  FileText,
+  BarChart3,
+  Crosshair,
+  AlertTriangle
 } from 'lucide-react';
 
 // --- ANIMATION UTILITIES ---
 
-// 1. Text Decoding Effect (Cryptographic Reveal)
 const ScrambleText = ({ text, className }) => {
   const [display, setDisplay] = useState('');
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&';
@@ -30,17 +31,13 @@ const ScrambleText = ({ text, className }) => {
     let iteration = 0;
     const interval = setInterval(() => {
       setDisplay(
-        text
-          .split('')
-          .map((letter, index) => {
-            if (index < iteration) return text[index];
-            return chars[Math.floor(Math.random() * chars.length)];
-          })
-          .join('')
+        text.split('').map((letter, index) => {
+          if (index < iteration) return text[index];
+          return chars[Math.floor(Math.random() * chars.length)];
+        }).join('')
       );
-
       if (iteration >= text.length) clearInterval(interval);
-      iteration += 1 / 3; // Speed of decode
+      iteration += 1 / 3;
     }, 30);
     return () => clearInterval(interval);
   }, [text]);
@@ -48,7 +45,6 @@ const ScrambleText = ({ text, className }) => {
   return <span className={className}>{display}</span>;
 };
 
-// 2. Scroll Reveal Wrapper
 const Reveal = ({ children, className = "", delay = 0 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef(null);
@@ -82,7 +78,6 @@ const Reveal = ({ children, className = "", delay = 0 }) => {
 
 // --- SIMULATION ENGINES ---
 
-// 3. Neural Cortex Background (Interactive Particle System)
 const NeuralCortex = () => {
   const canvasRef = useRef(null);
   const mouseRef = useRef({ x: 0, y: 0 });
@@ -101,34 +96,29 @@ const NeuralCortex = () => {
 
     const initParticles = () => {
       particles = [];
-      const count = Math.min(window.innerWidth / 10, 150); // Responsive count
+      const count = Math.min(window.innerWidth / 15, 100);
       for (let i = 0; i < count; i++) {
         particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 0.5,
-          vy: (Math.random() - 0.5) * 0.5,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
           size: Math.random() * 2,
-          color: Math.random() > 0.5 ? 'cyan' : 'indigo' // Neuro colors
+          color: Math.random() > 0.5 ? 'cyan' : 'indigo'
         });
       }
     };
 
     const draw = () => {
-      // Trail effect
       ctx.fillStyle = 'rgba(2, 2, 4, 0.2)'; 
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       particles.forEach((p, i) => {
-        // Move
         p.x += p.vx;
         p.y += p.vy;
-
-        // Bounce
         if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
         if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
 
-        // Mouse interaction
         const dx = mouseRef.current.x - p.x;
         const dy = mouseRef.current.y - p.y;
         const dist = Math.sqrt(dx*dx + dy*dy);
@@ -137,13 +127,11 @@ const NeuralCortex = () => {
           p.y += dy * 0.01;
         }
 
-        // Draw Particle
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = p.color === 'cyan' ? '#06b6d4' : '#6366f1';
         ctx.fill();
 
-        // Connect
         for (let j = i + 1; j < particles.length; j++) {
           const p2 = particles[j];
           const dx2 = p.x - p2.x;
@@ -160,7 +148,6 @@ const NeuralCortex = () => {
           }
         }
       });
-
       animationFrameId = requestAnimationFrame(draw);
     };
 
@@ -181,7 +168,6 @@ const NeuralCortex = () => {
   return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0 opacity-60" />;
 };
 
-// 4. 3D DNA Helix Simulation (Canvas)
 const DNASimulation = () => {
   const canvasRef = useRef(null);
 
@@ -191,7 +177,6 @@ const DNASimulation = () => {
     let frame = 0;
     
     const resize = () => {
-      // Make it high res
       const dpr = window.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width * dpr;
@@ -205,34 +190,29 @@ const DNASimulation = () => {
       
       const cx = rect.width / 2;
       const cy = rect.height / 2;
-      const strands = 2;
       const particlesPerStrand = 15;
       const amplitude = 30;
-      const separation = 20; // vertical distance between base pairs
+      const separation = 20;
       const speed = 0.02;
 
       for (let i = 0; i < particlesPerStrand; i++) {
         const y = (i - particlesPerStrand/2) * separation + cy;
         const phase = i * 0.5 + frame * speed;
         
-        // Strand 1
         const x1 = cx + Math.sin(phase) * amplitude;
-        const z1 = Math.cos(phase); // Depth factor
+        const z1 = Math.cos(phase);
         
-        // Strand 2
         const x2 = cx + Math.sin(phase + Math.PI) * amplitude;
         const z2 = Math.cos(phase + Math.PI);
 
-        // Draw Connector (Base pair)
         ctx.beginPath();
-        ctx.strokeStyle = `rgba(245, 158, 11, ${0.2})`; // Amber
+        ctx.strokeStyle = `rgba(245, 158, 11, ${0.2})`; 
         ctx.moveTo(x1, y);
         ctx.lineTo(x2, y);
         ctx.stroke();
 
-        // Draw Nodes
         const drawNode = (x, y, z) => {
-          const size = (z + 2) * 2; // Scale based on depth
+          const size = (z + 2) * 2; 
           const opacity = (z + 2) / 3;
           ctx.beginPath();
           ctx.arc(x, y, size, 0, Math.PI * 2);
@@ -287,9 +267,7 @@ const SectionHeading = ({ number, title, subtitle }) => (
 const TechCard = ({ title, items, color = "cyan" }) => (
   <Reveal className="h-full">
     <div className="h-full border border-white/5 bg-white/[0.02] backdrop-blur-md p-8 hover:bg-white/[0.05] hover:border-white/10 transition-all duration-500 group relative overflow-hidden">
-      {/* Hover Glow Effect */}
       <div className={`absolute -right-20 -top-20 w-40 h-40 bg-${color}-500/10 rounded-full blur-3xl group-hover:bg-${color}-500/20 transition-all`}></div>
-      
       <h3 className={`text-xl font-medium text-white mb-6 flex items-center gap-2`}>
         <span className={`w-1 h-4 bg-${color}-500 inline-block`}></span>
         {title}
@@ -304,16 +282,6 @@ const TechCard = ({ title, items, color = "cyan" }) => (
       </ul>
     </div>
   </Reveal>
-);
-
-const LiveMetric = ({ label, value, unit, trend }) => (
-  <div className="flex justify-between items-center font-mono text-xs border-b border-white/5 py-2">
-    <span className="text-neutral-500">{label}</span>
-    <div className="flex items-center gap-2">
-      <span className="text-cyan-400">{value}</span>
-      <span className="text-neutral-600">{unit}</span>
-    </div>
-  </div>
 );
 
 // --- MAIN APP ---
@@ -336,16 +304,15 @@ export default function App() {
     <div className="min-h-screen bg-[#030305] text-neutral-200 font-sans selection:bg-cyan-500/30 selection:text-cyan-100 overflow-x-hidden">
       <NeuralCortex />
       
-      {/* Scroll Progress Bar */}
+      {/* Scroll Progress */}
       <div className="fixed top-0 left-0 h-[2px] bg-gradient-to-r from-cyan-500 via-indigo-500 to-amber-500 z-[100]" style={{ width: `${scrollProgress * 100}%` }}></div>
 
-      {/* Navigation */}
+      {/* Nav */}
       <nav className="fixed w-full z-50 border-b border-white/5 bg-[#030305]/80 backdrop-blur-xl transition-all duration-300">
         <div className="container mx-auto px-6 h-20 flex justify-between items-center">
           <div className="flex items-center gap-3 group cursor-pointer">
             <div className="relative w-10 h-10 flex items-center justify-center bg-white/5 rounded-sm border border-white/10 group-hover:border-cyan-500/50 transition-colors">
               <Brain size={20} className="text-cyan-400" />
-              <Scan className="absolute inset-0 w-full h-full text-cyan-500/20 opacity-0 group-hover:opacity-100 animate-spin-slow" />
             </div>
             <div>
               <h1 className="text-lg font-bold tracking-tighter text-white leading-none">MINDXCOPE</h1>
@@ -354,19 +321,15 @@ export default function App() {
           </div>
 
           <div className="hidden lg:flex items-center gap-10">
-            {['Vision', 'Technology', 'Solutions', 'Gene-Ops'].map((item) => (
+            {['Vision', 'Stack', 'Report', 'Gene-Ops'].map((item) => (
               <a key={item} href={`#${item.toLowerCase()}`} className="text-[11px] font-bold font-mono uppercase tracking-widest text-neutral-400 hover:text-white transition-colors relative group">
-                <span className="relative z-10">{item}</span>
+                {item}
                 <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-cyan-500 transition-all duration-300 group-hover:w-full"></span>
               </a>
             ))}
           </div>
 
           <div className="flex items-center gap-6">
-            <div className="hidden md:flex flex-col items-end text-[10px] font-mono leading-tight">
-              <div className="flex items-center gap-1 text-emerald-500"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div> ONLINE</div>
-              <span className="text-neutral-600">LATENCY: 12ms</span>
-            </div>
             <button className="hidden lg:flex items-center gap-2 bg-white text-black px-5 py-2 text-[10px] font-bold uppercase tracking-widest hover:bg-cyan-400 transition-all">
               <Lock size={12} /> Access Portal
             </button>
@@ -377,254 +340,271 @@ export default function App() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <header className="relative pt-40 pb-32 lg:pt-64 lg:pb-48 z-10 overflow-hidden">
+      {/* Hero */}
+      <header className="relative pt-40 pb-20 lg:pt-64 lg:pb-40 z-10 overflow-hidden">
         <div className="container mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            
-            {/* Hero Text */}
-            <div className="relative z-10">
-              <div className="flex items-center gap-4 mb-8 animate-fade-in-up">
-                <HudTag text="Neuro-Link Established" />
-                <span className="text-[10px] font-mono text-neutral-600 uppercase tracking-widest">Build 2025.4.1</span>
-              </div>
-              
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tighter text-white leading-[0.9] mb-8">
-                <ScrambleText text="DECODING" className="block text-neutral-500" />
-                <span className="block text-white">HUMAN</span>
-                <span className="block bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-500 font-medium">COGNITION</span>
-              </h1>
-              
-              <p className="text-lg text-neutral-400 max-w-xl leading-relaxed mb-10 border-l-2 border-white/10 pl-6">
-                The world's first platform fusing <strong>AI, Neuroscience, and BCI</strong> to measure and enhance cognitive performance.
-              </p>
-
-              <div className="flex flex-wrap gap-4">
-                <button className="px-8 py-4 bg-cyan-600 text-white font-mono text-xs uppercase tracking-widest hover:bg-cyan-500 transition-all hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center gap-2">
-                  Initialize Demo <ChevronRight size={14} />
-                </button>
-                <button className="px-8 py-4 bg-transparent border border-white/20 text-white font-mono text-xs uppercase tracking-widest hover:bg-white/5 hover:border-white/40 transition-all">
-                  Read Whitepaper
-                </button>
-              </div>
+          <div className="flex flex-col items-start max-w-4xl">
+            <div className="flex items-center gap-4 mb-8 animate-fade-in-up">
+              <HudTag text="Bio-Intelligence" />
+              <span className="text-[10px] font-mono text-neutral-600 uppercase tracking-widest">System Ready</span>
             </div>
+            
+            <h1 className="text-5xl md:text-7xl lg:text-9xl font-light tracking-tighter text-white leading-[0.9] mb-8">
+              <ScrambleText text="DECODING" className="block text-neutral-500" />
+              <span className="block text-white">HUMAN</span>
+              <span className="block bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-500 font-medium">POTENTIAL</span>
+            </h1>
+            
+            <p className="text-lg text-neutral-400 max-w-xl leading-relaxed mb-10 border-l-2 border-white/10 pl-6">
+              Mindxcope integrates AI, Neuroscience, and Genetic data to measure, understand, and enhance human cognitive performance.
+            </p>
 
-            {/* Live Simulation Widget */}
-            <div className="relative animate-fade-in-up delay-200 hidden lg:block">
-              <div className="absolute inset-0 bg-cyan-500/10 blur-[100px] rounded-full"></div>
-              <div className="relative border border-white/10 bg-black/40 backdrop-blur-xl p-6 w-full max-w-sm ml-auto rounded-sm shadow-2xl">
-                <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
-                  <div className="flex items-center gap-2">
-                    <Activity size={16} className="text-cyan-400" />
-                    <span className="text-xs font-mono font-bold text-white tracking-widest">LIVE CORTEX FEED</span>
-                  </div>
-                  <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_red]"></span>
-                </div>
-
-                <div className="space-y-1">
-                  <LiveMetric label="ALPHA WAVES" value="10.4" unit="Hz" />
-                  <LiveMetric label="BETA WAVES" value="22.1" unit="Hz" />
-                  <LiveMetric label="COGNITIVE LOAD" value="84" unit="%" />
-                  <LiveMetric label="STRESS INDEX" value="LOW" unit="" />
-                </div>
-
-                <div className="mt-6 h-32 border border-white/5 bg-black/50 relative overflow-hidden flex items-end gap-1 px-1 pb-1">
-                   {/* Fake spectral bars */}
-                   {[...Array(20)].map((_, i) => (
-                     <div 
-                        key={i} 
-                        className="flex-1 bg-cyan-500/50 animate-pulse" 
-                        style={{ 
-                          height: `${Math.random() * 100}%`,
-                          animationDelay: `${i * 0.05}s`,
-                          animationDuration: '0.8s'
-                        }}
-                      ></div>
-                   ))}
-                </div>
-                <div className="mt-2 text-[9px] font-mono text-neutral-600 text-center uppercase">Real-time EEG/fNIRS Fusion Processing</div>
-              </div>
+            <div className="flex flex-wrap gap-4">
+              <button className="px-8 py-4 bg-cyan-600 text-white font-mono text-xs uppercase tracking-widest hover:bg-cyan-500 transition-all hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center gap-2">
+                Initialize Demo <ChevronRight size={14} />
+              </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Philosophy Section */}
+      {/* Philosophy */}
       <section id="vision" className="py-24 border-t border-white/5 bg-black z-10 relative">
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-2 gap-20">
             <div>
-              <SectionHeading number="01" title="Core Philosophy" subtitle="From Subjective to Objective." />
+              <SectionHeading number="01" title="Philosophy" subtitle="Objective Truth." />
               <Reveal delay={200}>
                 <p className="text-xl text-neutral-300 leading-relaxed mb-8">
-                  We are ending the era of guessing. Mindxcope measures the 
-                  <span className="text-cyan-400"> biological substrate</span> of thought.
+                  Cognition is not magic; it is biology. Mindxcope measures the 
+                  <span className="text-cyan-400"> electrical and genetic substrates</span> of thought.
                 </p>
                 <div className="space-y-8">
                   <div className="flex gap-4">
                     <div className="p-3 bg-neutral-900 h-fit rounded-sm"><Brain className="text-white" size={24} /></div>
                     <div>
                       <h4 className="text-white text-lg font-medium mb-2">The Vision</h4>
-                      <p className="text-neutral-500 leading-relaxed">To become the world’s most trusted authority on cognitive intelligence, enabling data-driven hiring and education.</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="p-3 bg-neutral-900 h-fit rounded-sm"><Globe className="text-white" size={24} /></div>
-                    <div>
-                      <h4 className="text-white text-lg font-medium mb-2">The Mission</h4>
-                      <p className="text-neutral-500 leading-relaxed">Democratize access to brain metrics while maintaining uncompromising ethical standards and privacy.</p>
+                      <p className="text-neutral-500 leading-relaxed">To become the world’s most trusted authority on cognitive intelligence, replacing subjective surveys with hard biological data.</p>
                     </div>
                   </div>
                 </div>
               </Reveal>
             </div>
-            
-            {/* Abstract Graphic */}
             <Reveal delay={400} className="relative h-full min-h-[400px] border border-white/10 bg-[#060608] flex items-center justify-center overflow-hidden">
                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
                <div className="relative w-64 h-64">
                  <div className="absolute inset-0 border border-cyan-500/20 rounded-full animate-[spin_10s_linear_infinite]"></div>
-                 <div className="absolute inset-4 border border-indigo-500/20 rounded-full animate-[spin_15s_linear_infinite_reverse]"></div>
-                 <div className="absolute inset-8 border border-white/5 rounded-full"></div>
                  <div className="absolute inset-0 flex items-center justify-center text-cyan-500/10">
                    <Network size={96} strokeWidth={0.5} />
                  </div>
-               </div>
-               <div className="absolute bottom-6 right-6 font-mono text-[10px] text-cyan-800 animate-pulse">
-                 PROCESSING NEURAL VECTORS...
                </div>
             </Reveal>
           </div>
         </div>
       </section>
 
-      {/* Technology Stack */}
-      <section id="technology" className="py-24 bg-[#030305] relative">
+      {/* Tech Stack */}
+      <section id="stack" className="py-24 bg-[#030305] relative">
         <div className="container mx-auto px-6">
-          <SectionHeading number="02" title="The Stack" subtitle="Cognitive Engine Architecture." />
-          
+          <SectionHeading number="02" title="The Stack" subtitle="Cognitive Engine." />
           <div className="grid md:grid-cols-3 gap-6">
             <TechCard 
               title="Signal Acquisition" 
-              items={[
-                "Multi-modal Fusion (EEG + fNIRS)",
-                "Medical-grade sensors (128ch)",
-                "Active Noise Cancellation",
-                "Sub-millisecond latency"
-              ]}
+              items={["Multi-modal Fusion (EEG + fNIRS)", "Medical-grade sensors (128ch)", "Sub-millisecond latency"]}
               color="cyan"
             />
              <TechCard 
               title="Deep Learning Core" 
-              items={[
-                "Scientific Machine Learning (SciML)",
-                "Transformer-based Time Series",
-                "Anomaly Detection Engines",
-                "Automated Feature Extraction"
-              ]}
+              items={["Scientific Machine Learning (SciML)", "Transformer-based Time Series", "Anomaly Detection Engines"]}
               color="indigo"
             />
              <TechCard 
               title="Privacy Layer" 
-              items={[
-                "Edge-Computing (Local Processing)",
-                "Federated Learning",
-                "Differential Privacy",
-                "GDPR / HIPAA Compliant"
-              ]}
+              items={["Edge-Computing (Local Processing)", "Federated Learning", "GDPR / HIPAA Compliant"]}
               color="emerald"
             />
           </div>
         </div>
       </section>
 
-      {/* Offerings Section */}
-      <section id="solutions" className="py-24 bg-neutral-950 border-t border-white/5">
+      {/* --- NEW: SAMPLE REPORT VISUALIZATION --- */}
+      <section id="report" className="py-24 bg-neutral-950 border-y border-white/5 relative">
         <div className="container mx-auto px-6">
-          <SectionHeading number="03" title="Solutions" subtitle="Applied Intelligence." />
+          <SectionHeading number="03" title="Intelligence" subtitle="The Output." />
+          
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <p className="text-xl text-neutral-300 mb-8">
+                Raw data is noise. Our platform synthesizes millions of data points into a clear, actionable <span className="text-cyan-400">Cognitive Report Card</span>.
+              </p>
+              <ul className="space-y-6">
+                {[
+                  { title: "Cognitive Load Index", desc: "Real-time measurement of mental effort vs capacity." },
+                  { title: "Fatigue Prediction", desc: "AI forecasts of when performance will degrade." },
+                  { title: "Flow State Analysis", desc: "Identifying peak performance windows." }
+                ].map((item, i) => (
+                  <li key={i} className="flex gap-4">
+                    <div className="mt-1 text-cyan-500"><BarChart3 size={20} /></div>
+                    <div>
+                      <h4 className="text-white font-medium">{item.title}</h4>
+                      <p className="text-sm text-neutral-500">{item.desc}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-4">
-            {[
-              { icon: Activity, title: "Cognitive Assessment", desc: "Real-time state estimation for focus, fatigue, and stress." },
-              { icon: Scan, title: "Talent Intelligence", desc: "Bias-free hiring using objective brain-data profiles." },
-              { icon: Terminal, title: "Research APIs", desc: "Enterprise access for universities and labs." },
-              { icon: Zap, title: "Neuro-Games", desc: "Gamified tasks for passive signal extraction." }
-            ].map((item, i) => (
-              <Reveal key={i} delay={i * 100}>
-                <div className="group h-full p-8 border border-white/5 bg-[#08080a] hover:bg-[#0d0d10] hover:border-cyan-500/30 transition-all duration-300">
-                  <item.icon className="text-neutral-500 mb-6 group-hover:text-cyan-400 transition-colors" size={28} />
-                  <h3 className="text-lg font-bold text-white mb-3">{item.title}</h3>
-                  <p className="text-sm text-neutral-400 leading-relaxed">{item.desc}</p>
+            {/* Visual Report Component */}
+            <div className="relative font-mono text-xs">
+              <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-indigo-600 rounded-lg blur opacity-20"></div>
+              <div className="relative bg-[#08080a] border border-white/10 rounded-lg p-6 shadow-2xl">
+                {/* Header */}
+                <div className="flex justify-between items-start border-b border-white/10 pb-4 mb-6">
+                  <div>
+                    <div className="text-neutral-500 uppercase tracking-widest mb-1">Confidential Intelligence Report</div>
+                    <div className="text-white text-lg font-bold">SUBJECT: 894-ALPHA</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-cyan-500">STATUS: ACTIVE</div>
+                    <div className="text-neutral-600">ID: #MK-9921-X</div>
+                  </div>
                 </div>
-              </Reveal>
-            ))}
+
+                {/* Grid */}
+                <div className="grid grid-cols-2 gap-6 mb-6">
+                  <div className="bg-white/5 p-4 rounded-sm border border-white/5">
+                    <div className="text-neutral-500 mb-2">COGNITIVE LOAD AVG</div>
+                    <div className="text-3xl text-white font-light">84<span className="text-sm text-neutral-600">%</span></div>
+                    <div className="w-full bg-neutral-800 h-1 mt-3">
+                      <div className="bg-cyan-500 h-1 w-[84%]"></div>
+                    </div>
+                  </div>
+                  <div className="bg-white/5 p-4 rounded-sm border border-white/5">
+                    <div className="text-neutral-500 mb-2">STRESS RESILIENCE</div>
+                    <div className="text-3xl text-white font-light">9.2<span className="text-sm text-neutral-600">/10</span></div>
+                    <div className="w-full bg-neutral-800 h-1 mt-3">
+                      <div className="bg-emerald-500 h-1 w-[92%]"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Graph Representation */}
+                <div className="mb-6">
+                  <div className="flex justify-between mb-2">
+                    <span className="text-neutral-500">FOCUS DURABILITY (60 MIN)</span>
+                    <span className="text-cyan-500">+12% vs Baseline</span>
+                  </div>
+                  <div className="h-32 flex items-end gap-1 border-b border-l border-white/10 p-1">
+                    {[30, 45, 50, 40, 60, 75, 80, 85, 70, 65, 80, 90, 95, 85, 80, 70, 60, 50, 40, 30].map((h, i) => (
+                      <div key={i} className="flex-1 bg-cyan-500/20 hover:bg-cyan-500 transition-colors" style={{ height: `${h}%` }}></div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Genetic Snippet */}
+                <div className="border-t border-white/10 pt-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Dna size={14} className="text-indigo-500" />
+                    <span className="text-indigo-400">GENOMIC MARKERS DETECTED</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-[10px] text-neutral-400">
+                    <div className="bg-indigo-950/30 p-2 border border-indigo-500/20">BDNF: Met/Met<br/>Plasticity: HIGH</div>
+                    <div className="bg-indigo-950/30 p-2 border border-indigo-500/20">COMT: Val/Val<br/>Stress: ELITE</div>
+                    <div className="bg-indigo-950/30 p-2 border border-indigo-500/20">ACTN3: RR<br/>Reaction: FAST</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* --- RESTRICTED SECTION: GENE OPS --- */}
+      {/* --- RESTRICTED: GENE OPS EXPANDED --- */}
       <section id="gene-ops" className="py-32 relative overflow-hidden bg-[#050300] border-y border-amber-900/30">
-        {/* Amber Hazard Lines */}
         <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-amber-600 to-transparent opacity-50"></div>
-        
         <div className="container mx-auto px-6 relative z-10">
+          
           <div className="flex items-center gap-4 mb-12">
             <ShieldAlert className="text-amber-600 animate-pulse" />
             <div>
               <div className="font-mono text-xs text-amber-600 tracking-[0.3em] uppercase">Restricted Access // Tier 1</div>
-              <div className="font-mono text-[10px] text-amber-900/60">MILITARY & INTELLIGENCE ONLY</div>
+              <div className="font-mono text-[10px] text-amber-900/60">MILITARY & INTELLIGENCE DEPARTMENTS ONLY</div>
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-16 items-start">
             <Reveal>
-              <h2 className="text-5xl md:text-7xl font-bold text-white mb-8 tracking-tighter leading-none">
-                GENOMIC <br/>
-                <span className="text-amber-600 text-stroke-amber">ARCHITECTURE</span>
+              <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tighter leading-none">
+                ADVANCED <br/>
+                <span className="text-amber-600 text-stroke-amber">GENE-OPS</span>
               </h2>
-              <p className="text-lg text-amber-500/70 mb-10 border-l border-amber-900/50 pl-6 font-light">
-                We analyze genetic substrates (COMT, BDNF) to predict operator resilience, reaction time, and neuroplasticity under extreme duress.
+              <p className="text-lg text-amber-500/70 mb-8 border-l border-amber-900/50 pl-6 font-light">
+                We analyze genetic substrates to predict operator resilience. Beyond measurement, we research <strong>bio-augmentation pathways</strong> for elite personnel.
               </p>
 
-              <div className="grid gap-6">
-                {[
-                  { title: "Predisposition Analysis", desc: "Screening for Warrior/Worrier gene expressions." },
-                  { title: "Neuroplasticity Scoring", desc: "Potential for rapid skill acquisition in field ops." },
-                  { title: "Stress Adaptation", desc: "Hormonal regulation under combat conditions." }
-                ].map((f, i) => (
-                  <div key={i} className="flex gap-4 items-start">
-                    <Dna size={18} className="text-amber-700 mt-1" />
-                    <div>
-                      <h4 className="text-white font-mono text-sm uppercase tracking-wide">{f.title}</h4>
-                      <p className="text-xs text-neutral-500">{f.desc}</p>
+              <div className="space-y-8">
+                {/* Accordion Style Content */}
+                <div>
+                  <h3 className="text-amber-500 font-mono text-sm uppercase mb-3 flex items-center gap-2">
+                    <Crosshair size={14} /> Performance Markers
+                  </h3>
+                  <div className="bg-amber-950/10 border border-amber-900/30 p-4 space-y-3">
+                    <div className="flex justify-between border-b border-amber-900/20 pb-2">
+                      <span className="text-white text-sm font-bold">COMT (Warrior Gene)</span>
+                      <span className="text-amber-600 text-xs">Stress Regulation</span>
                     </div>
+                    <p className="text-xs text-neutral-400">Analysis of Val158Met polymorphism. Operators with Val/Val genotype show superior performance in high-stakes, chaotic environments (Special Forces profile).</p>
+                    
+                    <div className="flex justify-between border-b border-amber-900/20 pb-2 pt-2">
+                      <span className="text-white text-sm font-bold">BDNF</span>
+                      <span className="text-amber-600 text-xs">Neuroplasticity</span>
+                    </div>
+                    <p className="text-xs text-neutral-400">Brain-Derived Neurotrophic Factor levels correlate with the speed of acquiring new skills (language, tactical movement) under pressure.</p>
                   </div>
-                ))}
+                </div>
+
+                <div>
+                  <h3 className="text-amber-500 font-mono text-sm uppercase mb-3 flex items-center gap-2">
+                    <AlertTriangle size={14} /> Augmentation Research (Classified)
+                  </h3>
+                  <div className="bg-amber-950/10 border border-amber-900/30 p-4">
+                    <p className="text-xs text-neutral-400 mb-2">
+                      <strong className="text-white">CRISPR/Cas9 Vectors:</strong> Theoretical frameworks for upregulating oxygen efficiency genes (EPAS1) for high-altitude operations.
+                    </p>
+                    <p className="text-xs text-neutral-400">
+                      <strong className="text-white">Synthetic Biology:</strong> Developing microbial gut-flora implants to enhance neurotransmitter production (Serotonin/Dopamine) for sustained morale without pharmaceuticals.
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              <div className="mt-12 flex items-center gap-4">
+              <div className="mt-8 flex items-center gap-4">
                  <button className="flex items-center gap-2 px-6 py-3 bg-amber-900/10 border border-amber-600/30 text-amber-500 font-mono text-xs uppercase tracking-widest hover:bg-amber-900/30 hover:border-amber-500 transition-all">
                    <Lock size={12} /> Request Clearance
                  </button>
               </div>
             </Reveal>
 
-            {/* 3D DNA SIMULATION VISUALIZER */}
-            <div className="relative h-[500px] w-full border border-amber-900/20 bg-black/50 rounded-lg overflow-hidden">
+            {/* 3D Visualizer */}
+            <div className="relative h-[600px] w-full border border-amber-900/20 bg-black/50 rounded-lg overflow-hidden">
                <div className="absolute top-4 left-4 z-20 font-mono text-[9px] text-amber-700">
-                 Subject: 894-Alpha <br/>
-                 Sequence: ACTG-9942 <br/>
-                 Status: Analyzing...
+                 TARGET: 894-Alpha <br/>
+                 MARKER: BDNF-A <br/>
+                 EDIT-VECTOR: SIMULATING...
                </div>
                
-               {/* The Custom Canvas Component */}
                <DNASimulation />
 
-               {/* Scanning Overlay */}
-               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-amber-500/5 to-transparent h-[10%] animate-scan pointer-events-none"></div>
-               
-               {/* Grid Overlay */}
+               {/* Overlays */}
                <div className="absolute inset-0 bg-[linear-gradient(rgba(245,158,11,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(245,158,11,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none"></div>
+               <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black to-transparent">
+                 <div className="flex gap-2">
+                   <div className="h-1 w-1/3 bg-amber-600 animate-pulse"></div>
+                   <div className="h-1 w-1/3 bg-amber-800"></div>
+                   <div className="h-1 w-1/3 bg-amber-900"></div>
+                 </div>
+                 <div className="text-amber-500 font-mono text-xs mt-2 text-right">SEQUENCE MATCH: 99.8%</div>
+               </div>
             </div>
           </div>
         </div>
@@ -633,52 +613,17 @@ export default function App() {
       {/* Footer */}
       <footer className="py-20 bg-black border-t border-white/5 text-sm z-10 relative">
         <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-4 gap-12 mb-16">
-            <div className="col-span-2">
-              <div className="flex items-center gap-2 mb-6">
-                <Brain className="text-cyan-500" size={24} />
-                <span className="text-xl font-bold tracking-tight text-white">MINDXCOPE</span>
-              </div>
-              <p className="text-neutral-500 max-w-xs">
-                Pioneering the Cognitive Age. <br/>
-                San Francisco • London • Singapore
-              </p>
-            </div>
-            <div>
-              <h4 className="text-white font-bold mb-4">Platform</h4>
-              <ul className="space-y-2 text-neutral-500">
-                <li className="hover:text-cyan-400 cursor-pointer">API Documentation</li>
-                <li className="hover:text-cyan-400 cursor-pointer">Hardware Support</li>
-                <li className="hover:text-cyan-400 cursor-pointer">Security Whitepaper</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-bold mb-4">Company</h4>
-              <ul className="space-y-2 text-neutral-500">
-                <li className="hover:text-cyan-400 cursor-pointer">About Us</li>
-                <li className="hover:text-cyan-400 cursor-pointer">Careers</li>
-                <li className="hover:text-cyan-400 cursor-pointer">Contact</li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between text-xs font-mono text-neutral-600">
-            <p>© 2024-2030 MINDXCOPE INC.</p>
+          <div className="flex flex-col md:flex-row justify-between items-center text-xs font-mono text-neutral-600">
+            <p>© 2024-2030 MINDXCOPE INC. // TIER 1 RESEARCH</p>
             <p>DESIGNED FOR THE ADVANCEMENT OF HUMANITY</p>
           </div>
         </div>
       </footer>
 
-      {/* Global CSS for custom animations */}
       <style>{`
         @keyframes scan {
           0% { top: -10%; }
           100% { top: 110%; }
-        }
-        .animate-scan {
-          animation: scan 4s linear infinite;
-        }
-        .animate-spin-slow {
-          animation: spin 8s linear infinite;
         }
         .text-stroke-amber {
           -webkit-text-stroke: 1px #d97706;
